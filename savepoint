@@ -14,7 +14,8 @@ while getopts ":r" o; do
   shift
 done
 
-db=$(getdb)
+source _set_oversion
+db=$(getdb "$OVERSION")
 savepoint_name=${1:-SAVEPOINT}
 
 if $restore; then

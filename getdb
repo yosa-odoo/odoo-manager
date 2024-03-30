@@ -1,5 +1,5 @@
 #!/bin/bash
 
-filepath="$HOME/.current_db"
+source _set_oversion
 
-cat "$filepath"
+awk '/db_name/ {print $3}' "$HOME/src/${OVERSION}/.odoorc"

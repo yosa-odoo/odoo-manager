@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Supposed to be called through `source`
+#
+# Will try to define OVERSION with an Odoo version, in this order:
+# - From the first arg passed
+#   /!\ If found, args will be shifted
+# - From a global variable `GLOBAL_OVERSION`
+# - From a script supposed to (s)elect an Odoo (v)ersion
+#   By default, its name is `sv`. Can be customized thanks to `SV_SCRIPT_NAME`
+# - From a fallback value
+#   By default: `master`. Can be customized thanks to `FALLBACK_OVERSION`
+
+extract_version() {
+  echo "$1" | grep -oE '^(master|(saas-)?[0-9]{2}\.[0-9])$'
+}
+
+script_name=${SV_SCRIPT_NAME:-"sv"}
+version_from_arg=$(extract_version "$1")
+
+if [ -n "$version_from_arg" ]; then
+  OVERSION=$version_from_arg
+  shift
+elif [ -n "$GLOBAL_OVERSION" ]; then
+  OVERSION=$GLOBAL_OVERSION
+elif command -v "$script_name" >/dev/null 2>&1; then
+  OVERSION=$($script_name)
+else
+  version=${FALLBACK_OVERSION:-"master"}
+  echo "(Can't guess the version, using $version as fallback)"
+  OVERSION="$version"
+fi
+
+OVERSION=$(extract_version "$OVERSION") # final check
+
+if [ -z "$OVERSION" ]; then
+  echo "No version found!" >&2
+  exit 1
+fi
