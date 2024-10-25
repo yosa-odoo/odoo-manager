@@ -20,3 +20,4 @@ _get_savepoints() {
 }
 complete -F _get_savepoints restoredb
 complete -F _get_savepoints savedb
+complete -F _get_savepoints savepoint
