@@ -68,8 +68,7 @@ elif command -v "$script_name" >/dev/null 2>&1; then
   OVERSION=$($script_name "$@")
 else
   log "Version defined thanks to fallback"
-  version=${FALLBACK_OVERSION:-"master"}
-  OVERSION="$version"
+  OVERSION=${FALLBACK_OVERSION:-"master"}
 fi
 
 log "Result before check: $OVERSION"
