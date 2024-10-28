@@ -42,7 +42,6 @@ elif command -v "$script_name" >/dev/null 2>&1; then
 else
   log "Version defined thanks to fallback"
   version=${FALLBACK_OVERSION:-"master"}
-  echo "(Can't guess the version, using $version as fallback)"
   OVERSION="$version"
 fi
 
