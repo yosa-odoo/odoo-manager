@@ -1,19 +1,18 @@
 #!/bin/bash
 
-# Supposed to be called through `source`
+# This script is intended to be sourced.
 #
-# Will try to define OVERSION with an Odoo version, in this order:
-# - From the option `-o` (for (o)doo version)
-#   /!\ If found, the option and its value will be removed from the args
-# - Using a regex applied to the first argument
-# - From a global variable `GLOBAL_OVERSION`
-# - From a script supposed to (s)elect an Odoo (v)ersion
-#   By default, its name is `sv`. Can be customized thanks to `SV_SCRIPT_NAME`
-#   (All args are passed to the script)
-# - From a fallback value
-#   By default: `master`. Can be customized thanks to `FALLBACK_OVERSION`
+# Attempts to define `OVERSION` (Odoo version) by prioritizing the following methods:
+# - `-o` option: If present, removes `-o` and its value from arguments
+# - Regex match: Extracts version from the first argument, if applicable
+# - `GLOBAL_OVERSION` variable: Uses if previously defined
+# - External script (`sv` by default): Runs a "(s)elect (v)ersion" script to determine Odoo version
+#   - Script name can be customized with `SV_SCRIPT_NAME`
+#   - All arguments are passed to the script
+# - Fallback: Uses default version `master`, or `FALLBACK_OVERSION` if specified
 #
-# Verbose mode can be enabled thanks to `VERBOSE`
+# Enable verbose output by setting `VERBOSE`.
+
 
 version_rg="(master|(saas-)?[0-9]{2}\.[0-9])"
 
