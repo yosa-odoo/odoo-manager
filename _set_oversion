@@ -3,8 +3,9 @@
 # Supposed to be called through `source`
 #
 # Will try to define OVERSION with an Odoo version, in this order:
-# - From the first arg passed
-#   /!\ If found, args will be shifted
+# - From the option `-o` (for (o)doo version)
+#   /!\ If found, the option and its value will be removed from the args
+# - Using a regex applied to the first argument
 # - From a global variable `GLOBAL_OVERSION`
 # - From a script supposed to (s)elect an Odoo (v)ersion
 #   By default, its name is `sv`. Can be customized thanks to `SV_SCRIPT_NAME`
@@ -13,8 +14,14 @@
 #
 # Verbose mode can be enabled thanks to `VERBOSE`
 
+version_rg="(master|(saas-)?[0-9]{2}\.[0-9])"
+
 extract_version() {
-  echo "$1" | grep -oE '^(master|(saas-)?[0-9]{2}\.[0-9])$'
+  echo "$1" | grep -oE "$version_rg"
+}
+
+extract_version_strict() {
+  echo "$1" | grep -oE "^$version_rg\$"
 }
 
 log() {
@@ -23,16 +30,35 @@ log() {
   fi
 }
 
+filtered_args=()
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    -o)
+      version_from_option="$2"
+      shift 2
+      ;;
+    *)
+      filtered_args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+set -- "${filtered_args[@]}"
+
 script_name=${SV_SCRIPT_NAME:-"sv"}
 log "Script name: $script_name"
 
 log "First arg: $1"
 version_from_arg=$(extract_version "$1")
 
-if [ -n "$version_from_arg" ]; then
+if [ -n "$version_from_option" ]; then
+  log "Version defined thanks to option -o"
+  OVERSION=$version_from_option
+elif [ -n "$version_from_arg" ]; then
   log "Version defined thanks to args"
   OVERSION=$version_from_arg
-  shift
 elif [ -n "$GLOBAL_OVERSION" ]; then
   log "Version defined thanks to global version"
   OVERSION=$GLOBAL_OVERSION
@@ -46,7 +72,7 @@ else
 fi
 
 log "Result before check: $OVERSION"
-OVERSION=$(extract_version "$OVERSION") # final check
+OVERSION=$(extract_version_strict "$OVERSION") # final check
 
 log "Final result: $OVERSION"
 if [ -z "$OVERSION" ]; then
