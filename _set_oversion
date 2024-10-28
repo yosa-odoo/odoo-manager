@@ -10,29 +10,46 @@
 #   By default, its name is `sv`. Can be customized thanks to `SV_SCRIPT_NAME`
 # - From a fallback value
 #   By default: `master`. Can be customized thanks to `FALLBACK_OVERSION`
+#
+# Verbose mode can be enabled thanks to `VERBOSE`
 
 extract_version() {
   echo "$1" | grep -oE '^(master|(saas-)?[0-9]{2}\.[0-9])$'
 }
 
+log() {
+  if [[ $VERBOSE -eq 1 ]]; then
+    echo "${BASH_SOURCE[0]}: $*"
+  fi
+}
+
 script_name=${SV_SCRIPT_NAME:-"sv"}
+log "Script name: $script_name"
+
+log "First arg: $1"
 version_from_arg=$(extract_version "$1")
 
 if [ -n "$version_from_arg" ]; then
+  log "Version defined thanks to args"
   OVERSION=$version_from_arg
   shift
 elif [ -n "$GLOBAL_OVERSION" ]; then
+  log "Version defined thanks to global version"
   OVERSION=$GLOBAL_OVERSION
 elif command -v "$script_name" >/dev/null 2>&1; then
+  log "Version defined thanks to script $script_name"
   OVERSION=$($script_name)
 else
+  log "Version defined thanks to fallback"
   version=${FALLBACK_OVERSION:-"master"}
   echo "(Can't guess the version, using $version as fallback)"
   OVERSION="$version"
 fi
 
+log "Result before check: $OVERSION"
 OVERSION=$(extract_version "$OVERSION") # final check
 
+log "Final result: $OVERSION"
 if [ -z "$OVERSION" ]; then
   echo "No version found!" >&2
   exit 1
