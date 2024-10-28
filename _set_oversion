@@ -12,7 +12,7 @@
 #   - All arguments are passed to the script
 # - Fallback: Uses default version `master`, or `FALLBACK_OVERSION` if specified
 #
-# Enable verbose output by setting `VERBOSE`.
+# Enable detailed output by setting `DEBUG`.
 
 
 version_rg="(master|(saas-)?[0-9]{2}\.[0-9])"
@@ -26,8 +26,8 @@ extract_version_strict() {
 }
 
 log() {
-  if [[ $VERBOSE -eq 1 ]]; then
-    echo "${BASH_SOURCE[0]}: $*"
+  if [[ $DEBUG -eq 1 ]]; then
+    echo "[DEBUG $(basename "${BASH_SOURCE[0]}")] $*"
   fi
 }
 
@@ -58,7 +58,7 @@ if [ -n "$version_from_option" ]; then
   log "Version defined thanks to option -o"
   OVERSION=$version_from_option
 elif [ -n "$version_from_arg" ]; then
-  log "Version defined thanks to args"
+  log "Version defined thanks to first arg"
   OVERSION=$version_from_arg
 elif [ -n "$GLOBAL_OVERSION" ]; then
   log "Version defined thanks to global version"
