@@ -6,7 +6,8 @@
 # - `-o` option: If present, removes `-o` and its value from arguments
 # - Regex match: Extracts version from the first argument, if applicable
 # - `GLOBAL_OVERSION` variable: Uses if previously defined
-# - External script (`sv` by default): Runs a "(s)elect (v)ersion" script to determine Odoo version
+# - External script (`sv` by default): If the "(s)elect (v)ersion" script exists,
+#   it is executed to determine the Odoo version
 #   - Script name can be customized with `SV_SCRIPT_NAME`
 #   - All arguments are passed to the script
 # - Fallback: Uses default version `master`, or `FALLBACK_OVERSION` if specified
