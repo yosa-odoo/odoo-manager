@@ -9,6 +9,7 @@
 # - From a global variable `GLOBAL_OVERSION`
 # - From a script supposed to (s)elect an Odoo (v)ersion
 #   By default, its name is `sv`. Can be customized thanks to `SV_SCRIPT_NAME`
+#   (All args are passed to the script)
 # - From a fallback value
 #   By default: `master`. Can be customized thanks to `FALLBACK_OVERSION`
 #
@@ -64,7 +65,7 @@ elif [ -n "$GLOBAL_OVERSION" ]; then
   OVERSION=$GLOBAL_OVERSION
 elif command -v "$script_name" >/dev/null 2>&1; then
   log "Version defined thanks to script $script_name"
-  OVERSION=$($script_name)
+  OVERSION=$($script_name "$@")
 else
   log "Version defined thanks to fallback"
   version=${FALLBACK_OVERSION:-"master"}
