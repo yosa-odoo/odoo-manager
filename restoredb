@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Could definitely be an alias, kept as it is for backward compatibility
-savepoint -r "$*"
+savepoint -r "$@"
