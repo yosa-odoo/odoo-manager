@@ -12,8 +12,6 @@
 #   - All arguments are passed to the script
 # - Fallback: Uses default version `master`, or `FALLBACK_OVERSION` if specified
 #
-# Enable detailed output by setting `DEBUG`.
-
 
 version_rg="(master|(saas-)?[0-9]{2}\.[0-9])"
 
@@ -31,8 +29,8 @@ log() {
   fi
 }
 
+log "Consume -o option and redefine the args of the script"
 filtered_args=()
-
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
     -o)
@@ -45,7 +43,6 @@ while [[ "$#" -gt 0 ]]; do
       ;;
   esac
 done
-
 set -- "${filtered_args[@]}"
 
 script_name=${SV_SCRIPT_NAME:-"sv"}
