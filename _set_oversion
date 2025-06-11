@@ -4,8 +4,8 @@
 #
 # Attempts to define `OVERSION` (Odoo version) by prioritizing the following methods:
 # - `-o` option: If present, removes `-o` and its value from arguments
-# - Regex match: Extracts version from the first argument, if applicable
 # - `GLOBAL_OVERSION` variable: Uses if previously defined
+# - Regex match: Extracts version from the first argument, if applicable
 # - External script (`sv` by default): If the "(s)elect (v)ersion" script exists,
 #   it is executed to determine the Odoo version
 #   - Script name can be customized with `SV_SCRIPT_NAME`
@@ -54,12 +54,12 @@ version_from_arg=$(extract_version "$1")
 if [ -n "$version_from_option" ]; then
   log "Version defined thanks to option -o"
   OVERSION=$version_from_option
-elif [ -n "$version_from_arg" ]; then
-  log "Version defined thanks to first arg"
-  OVERSION=$version_from_arg
 elif [ -n "$GLOBAL_OVERSION" ]; then
   log "Version defined thanks to global version"
   OVERSION=$GLOBAL_OVERSION
+elif [ -n "$version_from_arg" ]; then
+  log "Version defined thanks to first arg"
+  OVERSION=$version_from_arg
 elif command -v "$script_name" >/dev/null 2>&1; then
   log "Version defined thanks to script $script_name"
   OVERSION=$($script_name "$@")
