@@ -73,6 +73,6 @@ OVERSION=$(extract_version_strict "$OVERSION") # final check
 
 log "Final result: $OVERSION"
 if [ -z "$OVERSION" ]; then
-  echo "No version found!" >&2
-  exit 1
+  echo "No version found, force version to master" >&2
+  OVERSION="master"
 fi
