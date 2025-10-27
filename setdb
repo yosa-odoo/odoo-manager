@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source _set_oversion
+source _set_ovariables
 
-name=${1:-$OVERSION}
+name=${1:-"odoo"}
 
-sed -i "s/db_name =.*/db_name = $name/g" "$HOME/src/$OVERSION/.odoorc"
+sed -i "s/db_name =.*/db_name = $name/g" "$ORC_PATH"

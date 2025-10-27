@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source _set_oversion
+source _set_ovariables
 
-awk '/db_name/ {print $3}' "$HOME/src/${OVERSION}/.odoorc"
+awk '/db_name/ {print $3}' "$ORC_PATH"

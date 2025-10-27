@@ -2,7 +2,7 @@
 
 restore=false
 
-source _set_oversion
+source _set_ovariables
 
 while getopts ":r" o; do
   case "${o}" in
