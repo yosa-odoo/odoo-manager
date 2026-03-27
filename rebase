@@ -1,0 +1,32 @@
+#!/bin/bash
+# set -x
+
+REPO=$(pwd | rev | cut -d '/' -f1 | rev)
+VERSION=$(git branch --show-current | grep -oE '^master|(saas-)?[0-9]{2}\.[0-9]' | head -1)
+
+fetch=false
+
+if [[ "$REPO" != "odoo" && "$REPO" != "enterprise" ]]; then
+  >&2 echo "Wrong Repo"
+  exit 1
+fi
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -f|--fetch)
+      fetch=true
+      shift
+      ;;
+    *)
+      >&2 echo "Incorrect options/arguments"
+      >&2 echo ""
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$fetch" = true ]; then
+  git fetch --all --prune
+fi
+
+git rebase --autostash origin/"$VERSION"

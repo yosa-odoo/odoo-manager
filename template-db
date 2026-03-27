@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+available=$(ls -1 "$HOME/odoo-env" | grep -E '^(master|(saas-)?[0-9]{2}\.[0-9])$')
+versions=${*:-$available}
+
+for version in $versions
+do
+  b $version -I accountant,l10n_be, account_peppol,c_base
+done
+
+

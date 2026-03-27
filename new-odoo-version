@@ -1,0 +1,75 @@
+#!/bin/bash
+
+set -e
+
+repos=("odoo" "enterprise")
+ref_version="master"
+
+available=$(ls -1 "$HOME/odoo-env" | grep -E '^(master|(saas-)?[0-9]{2}\.[0-9])$')
+versions=${*:-$available}
+
+log() { echo "  [$1] $2"; }
+
+setup_version() {
+  local version="$1"
+
+  echo
+  echo "Setting up Odoo $version..."
+
+  # --- Git worktrees ---
+  echo
+  echo "Creating git worktrees..."
+  for repo in "${repos[@]}"; do
+    log "$repo" "Fetching $version from origin..."
+    git -C "$HOME/src/$ref_version/$repo" fetch -q origin "$version"
+    log "$repo" "Adding worktree at ~/src/$version/$repo..."
+    git -C "$HOME/src/$ref_version/$repo" worktree add "$HOME/src/$version/$repo" "$version"
+    log "$repo" "Done"
+  done
+
+  # --- Virtualenv ---
+  echo
+  echo "Creating virtualenv..."
+  if command -v uv >/dev/null 2>&1; then
+    uv venv --python 3.12 "$HOME/odoo-env/$version"
+    echo "  Installing requirements (uv)..."
+    uv pip install -q --python "$HOME/odoo-env/$version/bin/python" \
+      -r "$HOME/src/$version/odoo/requirements.txt"
+  else
+    python3 -m venv "$HOME/odoo-env/$version"
+    echo "  Installing requirements..."
+    "$HOME/odoo-env/$version/bin/pip" install -q -r "$HOME/src/$version/odoo/requirements.txt"
+  fi
+  echo "  Done: ~/odoo-env/$version"
+
+  # --- .odoorc ---
+  echo
+  echo "Initializing .odoorc..."
+  cat > "$HOME/src/$version/.odoorc" <<EOF
+[options]
+db_name = $version
+EOF
+  echo "  Done: ~/src/$version/.odoorc"
+
+  # --- PyCharm project setup ---
+  # config-run is a custom user script that sets up the PyCharm project
+  # for the new version. It is not part of this repo — skip if not available.
+  # Point Xenv to the new version so config-run picks up the right interpreter.
+  echo
+  if command -v config-run >/dev/null 2>&1; then
+    echo "Updating Xenv symlink..."
+    ln -sfn "$HOME/odoo-env/$version" "$HOME/odoo-env/Xenv"
+    echo "Running config-run..."
+    config-run "$version"
+    echo "  Done"
+  else
+    echo "config-run not found, skipping PyCharm setup."
+  fi
+
+  echo
+  echo "Odoo $version is ready."
+}
+
+for version in $versions; do
+  setup_version "$version"
+done
