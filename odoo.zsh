@@ -20,7 +20,16 @@ alias od="cd ..; cd odoo"
 alias en="cd ..; cd enterprise"
 alias o="cd ~/src/\$(getv)/odoo"
 alias e="cd ~/src/\$(getv)/enterprise"
-alias oshell="o && oenv_activate && cd .. && ./odoo/odoo-bin shell -d \$(getdb)"
+oshell() {
+    local version=$(getv)
+    local odoorc
+    if [ -f "$HOME/src/$version/.odoorc" ]; then
+        odoorc="$HOME/src/$version/.odoorc"
+    else
+        odoorc="$HOME/.odoorc"
+    fi
+    o && oenv_activate && cd .. && ./odoo/odoo-bin shell -c "$odoorc" -d $(getdb)
+}
 
 # --- Database ---
 

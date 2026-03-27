@@ -116,6 +116,7 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
+explicit_name=$name
 name=${name:-$(getdb)}
 
 if [[ -z "$name" ]]; then
@@ -168,9 +169,11 @@ switch_branch() {
 
 
 
-echo
-echo "Switching Odoo version..."
-cv "$odoo" > /dev/null
+if [ -n "$explicit_name" ] || [ -z "$modules_to_install" ]; then
+  echo
+  echo "Switching Odoo version..."
+  cv "$odoo" > /dev/null
+fi
 
 if echo "$name" | grep -oEq '^master|(saas-)?[0-9]{2}\.[0-9]-.'
 then
