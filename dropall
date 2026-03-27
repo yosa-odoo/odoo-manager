@@ -1,6 +1,17 @@
 #!/bin/bash 
 
-for arg in "$@"; do
+if [ $# -gt 0 ]; then
+    all_input="$*"
+else
+    all_input=$(cat)
+fi
+
+if [ -z "$all_input" ]; then
+    >&2 echo "Needs at least one parameter: task ID or branch name"
+    exit 1
+fi
+
+for arg in $all_input; do
   db_list=$(ldb -a | grep "$arg")
   for db_name in $db_list; do
     echo "Deleting $db_name"

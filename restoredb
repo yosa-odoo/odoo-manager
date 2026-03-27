@@ -1,7 +1,4 @@
 #!/bin/bash
 
-db=$(getdb)
-
-name_extension=${1:-SAVEPOINT}
-
-copydb "${db}__${name_extension}" "$db"
+# Could definitely be an alias, kept as it is for backward compatibility
+savepoint -r "$@"

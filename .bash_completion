@@ -15,8 +15,9 @@ _get_savepoints() {
     local cur opts current_db
     cur="${COMP_WORDS[COMP_CWORD]}"
     current_db="$(getdb)"
-    opts="$(ldb -a | grep "^${current_db}__" | sed 's/__/#/g' | cut -d'#' -f2)"
+    opts="$(ldb -a | grep "^${current_db}__" | sed 's/__/#/' | cut -d'#' -f2)"
     COMPREPLY=($(compgen -W "${opts}" -- "${cur}"))
 }
 complete -F _get_savepoints restoredb
 complete -F _get_savepoints savedb
+complete -F _get_savepoints savepoint

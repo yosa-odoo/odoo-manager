@@ -1,0 +1,26 @@
+#!/bin/bash
+
+restore=false
+
+source _set_ovariables
+
+while getopts ":r" o; do
+  case "${o}" in
+    r)
+      restore=true
+      ;;
+    *)
+      echo "Illegal option" >&2 && exit 1
+      ;;
+  esac
+  shift
+done
+
+db=$(getdb -o "$OVERSION")
+savepoint_name=${1:-SAVEPOINT}
+
+if $restore; then
+  copydb "${db}__${savepoint_name}" "$db"
+else
+  copydb "$db" "${db}__${savepoint_name}"
+fi
