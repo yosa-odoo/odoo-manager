@@ -1,4 +1,4 @@
-Tools to manage the DBs (switch, save & restore)
+# Odoo (amazing) Tools
 
 > **Note:** This tool only works with a **multi-version environment**. Each
 > Odoo version must have its own source directory and its own Python virtual
@@ -40,12 +40,11 @@ written without touching any file.
 ### Setup
 
 To define and get the database you are working on, `setdb` and `getdb`
-must be used
+must be used.
 
-- `setdb` takes one argument and writes it in a file. By default, it
-  also writes the DB name in the `.odoorc` file, but this line is
-  actually not mandatory and can be removed
-- `getdb` simply reads and returns the content of the file
+- `setdb` takes one argument and writes the DB name into the `.odoorc`
+  file for the current version
+- `getdb` reads and returns the DB name from the same file
 
 ### Switch
 
@@ -90,7 +89,7 @@ and above, and `--without-demo=False` for earlier versions.
 
 ### Save & Restore
 
-Here are the two mains scripts of this repo:
+Here are the two main scripts of this repo:
 
 **`savedb`:**
 It stores the state of the current DB and its filestore. To do so, the
@@ -102,7 +101,7 @@ defaulted to *SAVEPOINT*
 **`restoredb`:**
 It restores the current DB to a given state. The script takes one
 argument: the savepoint name. If not provided, it will use the state
-nammed *SAVEPOINT*.
+named *SAVEPOINT*.
 
 ### Flow example
 
@@ -150,18 +149,56 @@ restoredb config
 # This will copy the DB called 1234567-15.0__config to the current one
 ```
 
+### Version management
+
+These scripts manage the set of installed Odoo versions. They all accept
+an explicit list of versions as arguments; if none is given, they derive
+the list from the directories present in `~/odoo-env`.
+
+**`new-odoo-version`:**
+Sets up everything needed for a new Odoo version: git worktrees under
+`~/src/<version>/`, a fresh virtualenv under `~/odoo-env/<version>/`,
+and a `.odoorc` pre-filled with `db_name = <version>`. If the custom
+`config-run` script is available, it is called to configure the IDE
+project.
+
+```
+new-odoo-version 19.0
+new-odoo-version saas-19.1 19.0   # set up several versions at once
+```
+
+**`update-version`:**
+Pulls the latest changes for all versions in both the `odoo` and
+`enterprise` repositories. Each version branch is rebased against its
+remote counterpart; the currently checked-out branch is restored
+afterwards.
+
+```
+update-version              # update all versions found in ~/odoo-env
+update-version 17.0 18.0   # update specific versions only
+```
+
+**`template-db`:**
+Creates (or recreates) a template database for each version by running
+`b <version> -I account_accountant`. These templates are used by `b`
+to initialise new DBs quickly without a full Odoo startup.
+
+```
+template-db                  # rebuild templates for all versions
+template-db 17.0 18.0        # rebuild for specific versions only
+```
+
 ### Misc
 
-This repository provides few other scripts. Some of them are used by the
-above ones, some other are additional tools.
+This repository provides a few other scripts. Some are used internally
+by the above, others are standalone tools.
 
-- `copydb` takes two arguments _X_ and _Y_, it copies _X_ on a new DB
-  called _Y_. It is used by `savedb` and `restoredb`
-- `killodoo` kills all Odoo processes. It is executed by `copydb`,
-  otherwise it's not possible to process the copy.
-- `ldb` lists all databases (`-a` will also list all savepoints)
-- `dropall`: for each argument _X_, it drops all databases that contain
-  _X_ in their name
-- `.bash_completion` allows the user to auto complete the arguments
-  of `dropdb`, `setdb`, `copydb`, `restoredb` and `savedb` in the
-  terminal
+- `copydb` takes two arguments _X_ and _Y_, copies _X_ into a new DB
+  called _Y_. Used internally by `savedb` and `restoredb`
+- `killodoo` kills all running Odoo processes. Called by `copydb` since
+  a live server prevents DB copies
+- `ldb` lists all databases (`-a` also lists savepoints)
+- `dropall` drops every database whose name contains the given string.
+  Also accepts input from stdin (`ldb | grep foo | dropall`)
+- `.bash_completion` enables tab-completion for `dropall`, `setdb`,
+  `copydb`, `restoredb`, `savedb`, and `savepoint`

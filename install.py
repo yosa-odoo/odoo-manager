@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Interactive installer for db_manager."""
+"""Interactive installer for odoo-manager."""
 
 import os
 import re
@@ -9,7 +9,7 @@ from pathlib import Path
 
 HOME = Path.home()
 SCRIPTS_DIR = Path(__file__).parent.resolve()
-MARKER = "# db_manager"
+MARKER = "# odoo-manager"
 VERSION_RE = re.compile(r'^(master|(saas-)?[0-9]{2}\.[0-9])$')
 
 DRY_RUN = "--dry-run" in sys.argv
@@ -112,12 +112,12 @@ def ensure_executable():
 
 
 def write_conf(env_path):
-    conf_path = HOME / ".db_manager.conf"
+    conf_path = HOME / ".odoo-manager.conf"
     if DRY_RUN:
         print(f"  Would write {conf_path}")
         return
     conf_path.write_text(
-        f"# db_manager configuration — sourced by install.py\n"
+        f"# odoo-manager configuration — sourced by install.py\n"
         f"export ODOO_ENV_PATH={env_path}\n"
     )
     print(f"  Written {conf_path}")
@@ -125,9 +125,9 @@ def write_conf(env_path):
 
 def main():
     if DRY_RUN:
-        print("=== db_manager installer (dry run — nothing will be written) ===\n")
+        print("=== odoo-manager installer (dry run — nothing will be written) ===\n")
     else:
-        print("=== db_manager installer ===\n")
+        print("=== odoo-manager installer ===\n")
 
     setup_mode = ask_choice(
         "Setup mode — single ~/.odoorc or multi (per-version ~/src/<ver>/.odoorc)",
@@ -165,7 +165,7 @@ def main():
     shell_block = (
         f"{MARKER}\n"
         f'export PATH="{SCRIPTS_DIR}:$PATH"\n'
-        f'[ -f "$HOME/.db_manager.conf" ] && source "$HOME/.db_manager.conf"\n'
+        f'[ -f "$HOME/.odoo-manager.conf" ] && source "$HOME/.odoo-manager.conf"\n'
         f'[ -f "{SCRIPTS_DIR}/.bash_completion" ] && source "{SCRIPTS_DIR}/.bash_completion"'
     )
     idempotent_append(shell_rc, shell_block)

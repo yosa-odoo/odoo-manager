@@ -46,7 +46,12 @@ if [ "$with_demo" = true ]; then
 fi
 
 odoo_env_path="${ODOO_ENV_PATH:-$HOME/odoo-env}"
-cd ~/src/"$version" && "$odoo_env_path"/"$version"/bin/python $HOME/src/"$version"/odoo/odoo-bin -c $HOME/.odoorc --stop-after-init -i $@ $demo_flag
+if [ -f "$HOME/src/$version/.odoorc" ]; then
+  odoorc="$HOME/src/$version/.odoorc"
+else
+  odoorc="$HOME/.odoorc"
+fi
+cd ~/src/"$version" && "$odoo_env_path"/"$version"/bin/python $HOME/src/"$version"/odoo/odoo-bin -c "$odoorc" --stop-after-init -i $@ $demo_flag
 
 if [ "$delete_db" = true ]
 then

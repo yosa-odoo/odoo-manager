@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+if [ $# -lt 1 ]; then
+    >&2 echo "Needs 1 parameter: task ID or branch name"
+    exit 1
+fi
+
+identifier=$(echo $1 | grep -oE "[0-9]{7}" || echo $1)
+
+echo "--- Delete branches"
+cd $HOME/src/all/odoo
+git branch --format='%(refname:short)' | grep $identifier | while read b; do git branch -D $b; done
+cd $HOME/src/all/enterprise
+git branch --format='%(refname:short)' | grep $identifier | while read b; do git branch -D $b; done
+
+echo
+
+echo "--- Delete DBs"
+dropall "$identifier".*
+
+echo
+
+echo "--- Remove filestores"
+cd $HOME/.local/share/Odoo/filestore
+ls | grep $identifier | while read file; do echo "rm $file"; rm -rf $file; done
+
+echo
+
+echo "--- Done."
