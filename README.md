@@ -1,5 +1,24 @@
 Tools to manage the DBs (switch, save & restore)
 
+> **Note:** This tool only works with a **multi-version environment**. Each
+> Odoo version must have its own source directory and its own Python virtual
+> environment. For example:
+>
+> ```
+> ~/src/          # one subdirectory per version
+> ├── 16.0/
+> ├── 17.0/
+> └── ...
+>
+> ~/odoo-env/     # one virtualenv per version, matching the source directories
+> ├── 16.0/
+> ├── 17.0/
+> └── ...
+> ```
+>
+> One version = one Python environment. The tools rely on this structure to
+> activate the correct virtualenv when switching between versions.
+
 ### Install
 
 Run the installer and follow the prompts:
