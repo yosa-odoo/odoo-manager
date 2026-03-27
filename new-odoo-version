@@ -42,6 +42,13 @@ setup_version() {
   fi
   echo "  Done: ~/odoo-env/$version"
 
+  # --- Custom addons symlink ---
+  echo
+  echo "Setting up custom addons symlink..."
+  mkdir -p "$HOME/src/custom"
+  ln -sfn "$HOME/src/custom" "$HOME/src/$version/custom"
+  echo "  Done: ~/src/$version/custom -> ~/src/custom"
+
   # --- .odoorc ---
   echo
   echo "Initializing .odoorc..."
