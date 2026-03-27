@@ -1,0 +1,57 @@
+#!/bin/bash
+
+delete_db=true
+with_demo=false
+
+while getopts ":nD" o; do
+  case "${o}" in
+    n)
+      delete_db=false
+      shift
+      ;;
+    D)
+      with_demo=true
+      shift
+      ;;
+    *)
+      echo "Illegal option" && exit 1
+      ;;
+  esac
+done
+
+version_ge_19() {
+  [[ "$1" == "master" ]] && return 0
+  local major; major=$(echo "$1" | grep -oE '^[0-9]+')
+  [[ "$major" -ge 19 ]]
+}
+
+db=$(getdb)
+version=$(echo "$db" | grep -oE 'master|(saas-)?[0-9]{2}\.[0-9]' | head -1)
+killodoo
+
+if [ "$delete_db" = true ]
+then
+  dropdb --if-exists $db
+  rm -rf $HOME/.local/share/Odoo/filestore/$db
+fi
+
+# because odoorc is relative
+demo_flag=""
+if [ "$with_demo" = true ]; then
+  if version_ge_19 "$version"; then
+    demo_flag="--with-demo"
+  else
+    demo_flag="--without-demo=False"
+  fi
+fi
+
+odoo_env_path="${ODOO_ENV_PATH:-$HOME/odoo-env}"
+cd ~/src/"$version" && "$odoo_env_path"/"$version"/bin/python $HOME/src/"$version"/odoo/odoo-bin -c $HOME/.odoorc --stop-after-init -i $@ $demo_flag
+
+if [ "$delete_db" = true ]
+then
+  psql -d $db -c "update ir_cron set active=false;"
+  psql -d $db -c "insert into ir_config_parameter(key,value) values ('database.expiration_date','2998-05-07 13:16:50');"
+fi
+
+savedb init

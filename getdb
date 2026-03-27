@@ -1,5 +1,5 @@
 #!/bin/bash
 
-filepath="$HOME/.current_db"
+source _set_ovariables
 
-cat "$filepath"
+awk '/db_name/ {print $3}' "$ORC_PATH"
