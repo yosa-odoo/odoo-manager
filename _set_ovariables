@@ -20,14 +20,16 @@
 #      this tool
 #    - All arguments of the main script are passed to `sv`
 #    - The script name can be customized via `SV_SCRIPT_NAME`
-# 5. Fallback: Uses the version `master`, or `FALLBACK_OVERSION` if
+# 5. Persisted version: Reads `~/.odoo_current_version` if it exists.
+#    This file is written whenever the version is successfully resolved
+#    via steps 1–4, so it reflects the last explicitly used version.
+# 6. Fallback: Uses the version `master`, or `FALLBACK_OVERSION` if
 #    specified
 #
-# Finally, the script defines `ORC_PATH`. It first checks whether such
-# a file exists in `$HOME`. If not, it considers the case of a
-# multi-version setup and looks for the file at:
-# `$HOME/src/$OVERSION/.odoorc`
-# If no file is found, the variable remains unset.
+# Finally, the script defines `ORC_PATH`:
+# - First tries `$HOME/src/$OVERSION/.odoorc` (multi-version setup)
+# - Falls back to `$HOME/.odoorc` (single shared rc file)
+# - If neither exists, the variable remains unset.
 
 version_rg="(master|(saas-)?[0-9]{2}\.[0-9])"
 
@@ -71,15 +73,23 @@ fi
 
 OVERSION=$(extract_version_strict "$OVERSION") # final check
 
+_oversion_file="$HOME/.odoo_current_version"
+
+if [ -n "$OVERSION" ]; then
+  echo "$OVERSION" > "$_oversion_file"
+elif [ -f "$_oversion_file" ]; then
+  OVERSION=$(cat "$_oversion_file")
+fi
+
 if [ -z "$OVERSION" ]; then
   echo "No version found, defaulting to ${FALLBACK_OVERSION:-master}" >&2
   OVERSION="${FALLBACK_OVERSION:-master}"
 fi
 
-if [ -e "$HOME/.odoorc" ]; then
-  ORC_PATH="$HOME/.odoorc"
-elif [ -e "$HOME/src/$OVERSION/.odoorc" ]; then
+if [ -e "$HOME/src/$OVERSION/.odoorc" ]; then
   ORC_PATH="$HOME/src/$OVERSION/.odoorc"
+elif [ -e "$HOME/.odoorc" ]; then
+  ORC_PATH="$HOME/.odoorc"
 fi
 
 ODOO_ENV_PATH="${ODOO_ENV_PATH:-$HOME/odoo-env}"
