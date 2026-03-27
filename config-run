@@ -1,0 +1,13 @@
+#!/bin/bash
+
+version="${1:-15.0}"
+source_path="/home/odoo/src/all/.idea/runConfigurations"
+target_path="/home/odoo/src/$version/.idea/runConfigurations"
+mkdir -p "$target_path"
+
+files=("0_INIT.xml" "1_NORMAL.xml" "2_TESTS_.xml")
+
+for file in "${files[@]}"; do
+  cp "$source_path/$file" "$target_path/$file"
+  xmlstarlet ed --inplace -u '//module[@name="all"]/@name' -v "$version" "$target_path/$file"
+done
