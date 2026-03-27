@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source _set_ovariables
+
+echo "$OVERSION"
