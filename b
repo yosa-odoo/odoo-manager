@@ -30,6 +30,8 @@ function show_help {
   echo "        Install the list of modules at the end of the configuration"
   echo "  -I MODULES, --init-modules MODULES"
   echo "        Same as -i but delete the existing DB first"
+  echo "  -D, --with-demo"
+  echo "        Install with demo data (passed to odoo-install)"
   echo ""
   echo "If NAME starts with '<version>-', the script will consider NAME as a potential"
   echo "branch name. It will therefore check in the local repositories to find and use"
@@ -59,10 +61,7 @@ init=true
 restore_init=false
 modules_to_init=""
 modules_to_install=""
-community=false
-keep_window=false
-window_id=$(xdotool getwindowfocus)
-window_name=$(xdotool getwindowfocus getwindowname)
+with_demo=false
 
 
 while [[ "$#" -gt 0 ]]; do
@@ -99,11 +98,8 @@ while [[ "$#" -gt 0 ]]; do
       modules_to_init="$2"
       shift
       ;;
-    -c|--community)
-      community=true
-      ;;
-    -k|--keep-window)
-      keep_window=true
+    -D|--with-demo)
+      with_demo=true
       ;;
     *)
       if [ -z "$name" ]
@@ -120,7 +116,6 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
-explicit_name=$name
 name=${name:-$(getdb)}
 
 if [[ -z "$name" ]]; then
@@ -172,17 +167,10 @@ switch_branch() {
 
 
 
-#ostate "Previous configuration"
 
-openpycharm ~/src/"$odoo" &
-
-
-
-if [ -n "$explicit_name" ] || [ -z "$modules_to_install" ]; then
-  echo
-  echo "Switching Odoo version..."
-  cv "$odoo" > /dev/null
-fi
+echo
+echo "Switching Odoo version..."
+cv "$odoo" > /dev/null
 
 if echo "$name" | grep -oEq '^master|(saas-)?[0-9]{2}\.[0-9]-.'
 then
@@ -221,16 +209,9 @@ then
 fi
 setdb "$database"
 
-#echo "Setting OdooRC..."
-#if [ "$community" = true ]; then
-#  odoorc -v "$odoo" -c
-#else
-#  odoorc -v "$odoo" -e
-#fi
-
 
 if [ -n "$modules_to_init" ]; then
-  odoo-install "$modules_to_init"
+  odoo-install $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_init"
 elif [ "$odoo" != "master" ] && [ "$init" = true ] && ! ldb | grep -Eq "^$database$"
 then
   template="${odoo}__init"
@@ -251,17 +232,6 @@ then
 fi
 
 if [ -n "$modules_to_install" ]; then
-  odoo-install -n "$modules_to_install"
-fi
-
-
-# config_search "$odoo"
-
-if echo "$window_name" | grep -q "$odoo"; then
-  keep_window=true
-fi
-
-if [ "$keep_window" = false ] ; then
-  (sleep 0.5s && wmctrl -ic "$window_id") &
+  odoo-install -n $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_install"
 fi
 
