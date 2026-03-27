@@ -1,0 +1,41 @@
+33,34d32
+<   echo "  -D, --with-demo"
+<   echo "        Install with demo data (passed to odoo-install)"
+64c62,65
+< with_demo=false
+---
+> community=false
+> keep_window=false
+> window_id=$(xdotool getwindowfocus)
+> window_name=$(xdotool getwindowfocus getwindowname)
+101,102c102,106
+<     -D|--with-demo)
+<       with_demo=true
+---
+>     -c|--community)
+>       community=true
+>       ;;
+>     -k|--keep-window)
+>       keep_window=true
+171a176,177
+> openpycharm ~/src/"$odoo" &
+> 
+224c230
+<   odoo-install $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_init"
+---
+>   odoo-install "$modules_to_init"
+245c251,262
+<   odoo-install -n $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_install"
+---
+>   odoo-install -n "$modules_to_install"
+> fi
+> 
+> 
+> # config_search "$odoo"
+> 
+> if echo "$window_name" | grep -q "$odoo"; then
+>   keep_window=true
+> fi
+> 
+> if [ "$keep_window" = false ] ; then
+>   (sleep 0.5s && wmctrl -ic "$window_id") &
