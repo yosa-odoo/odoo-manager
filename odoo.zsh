@@ -4,7 +4,7 @@
 # Sourced from ~/.zshrc via the odoo-manager block at the bottom
 
 # --- Environment ---
-
+# torefactor (not the coffee mdr)
 ce() {
     changexenv "$1"
     source "$HOME/odoo-env/Xenv/bin/activate"
