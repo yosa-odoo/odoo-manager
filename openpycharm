@@ -1,0 +1,3 @@
+#!/bin/bash
+
+pycharm nosplash "${1:-$(pwd)}" >/dev/null 2>&1 &
