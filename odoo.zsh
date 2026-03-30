@@ -34,6 +34,7 @@ oshell() {
 # --- Database ---
 
 alias getopw="getdb | cut -d '-' -f1"
+alias getticket="getdb | cut -c1-7"
 alias psqlo="psql -d \$(getdb)"
 alias apps="psql -d \$(getdb) -c \"SELECT name, state FROM ir_module_module WHERE state = 'installed';\""
 
