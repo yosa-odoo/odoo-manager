@@ -1,5 +1,0 @@
-#!/bin/bash
-
-file="$HOME/.current_db"
-cut -c1-7 < "$file"
-
