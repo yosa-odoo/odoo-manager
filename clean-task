@@ -12,9 +12,9 @@ fi
 identifier=$(echo $1 | grep -oE "[0-9]{7}" || echo $1)
 
 echo "--- Delete branches"
-cd $HOME/src/"$OVERSION"/odoo
+cd $ODOO_SRC_PATH/"$OVERSION"/odoo
 git branch --format='%(refname:short)' | grep $identifier | while read b; do git branch -D $b; done
-cd $HOME/src/"$OVERSION"/enterprise
+cd $ODOO_SRC_PATH/"$OVERSION"/enterprise
 git branch --format='%(refname:short)' | grep $identifier | while read b; do git branch -D $b; done
 
 echo

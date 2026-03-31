@@ -268,6 +268,15 @@ resolution order is:
 5. `~/.odoo_current_version` — persisted from the last successful resolution
 6. Fallback: `master`, or `FALLBACK_OVERSION` if set
 
+`_set_ovariables` also sets two path variables used by all scripts:
+
+- `ODOO_SRC_PATH` — base directory for Odoo source trees (default: `~/src`)
+- `ODOO_ENV_PATH` — base directory for Python virtualenvs (default: `~/odoo-env`)
+
+Both are written to `~/.odoo-manager.conf` by `install.py` and sourced by the
+shell rc at startup. The fallbacks in `_set_ovariables` only apply when the
+conf file is absent (e.g. before running the installer).
+
 ### Misc
 
 This repository provides a few other scripts used internally by the above.
