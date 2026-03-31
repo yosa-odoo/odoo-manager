@@ -19,11 +19,6 @@
 > One version = one Python environment. The tools rely on this structure to
 > activate the correct virtualenv when switching between versions.
 
-> **Note:** Some scripts referenced in this README (`b`, `new-odoo-version`,
-> `sv`) are **not** part of this repository. They are user-defined companion
-> scripts that this toolset integrates with. Their expected behaviour is
-> described here for context.
-
 ### Install
 
 Run the installer and follow the prompts:

@@ -173,8 +173,10 @@ switch_branch() {
 
 if [ -n "$explicit_name" ] || [ -z "$modules_to_install" ]; then
   echo
-  echo "Switching Odoo version..."
-  cv "$odoo" > /dev/null
+  echo "Resetting to $odoo..."
+  git -C "$ODOO_SRC_PATH/$odoo/odoo" checkout -q "$odoo" &
+  git -C "$ODOO_SRC_PATH/$odoo/enterprise" checkout -q "$odoo" &
+  wait
 fi
 
 if echo "$name" | grep -oEq '^master|(saas-)?[0-9]{2}\.[0-9]-.'
