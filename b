@@ -176,13 +176,13 @@ switch_branch() {
   return 1
 }
 
-
-
-
 echo
 echo "Opening $ODOO_SRC_PATH"/"$odoo" && openpycharm "$ODOO_SRC_PATH"/"$odoo" &
 
-
+echo "Resetting to $odoo..."
+git -C "$ODOO_SRC_PATH/$odoo/odoo" checkout -q "$odoo" &
+git -C "$ODOO_SRC_PATH/$odoo/enterprise" checkout -q "$odoo" &
+wait
 
 if echo "$name" | grep -oEq '^master|(saas-)?[0-9]{2}\.[0-9]-.'
 then
