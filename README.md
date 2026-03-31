@@ -19,6 +19,11 @@
 > One version = one Python environment. The tools rely on this structure to
 > activate the correct virtualenv when switching between versions.
 
+> **Note:** Some scripts referenced in this README (`b`, `new-odoo-version`,
+> `sv`) are **not** part of this repository. They are user-defined companion
+> scripts that this toolset integrates with. Their expected behaviour is
+> described here for context.
+
 ### Install
 
 Run the installer and follow the prompts:
@@ -46,12 +51,15 @@ must be used.
   file for the current version
 - `getdb` reads and returns the DB name from the same file
 
+Both scripts rely on `_set_ovariables` (see [Version resolution](#version-resolution))
+to locate the correct `.odoorc`.
+
 ### Switch
 
-**`b`:**
+**`b` (external):**
 Sets up the full Odoo environment for a given ticket or branch name. It
 activates the right virtualenv, sets the DB name, and initializes the
-DB if needed.
+DB if needed. This script is **not** part of this repository.
 
 The basic usage is with a ticket number:
 
@@ -87,21 +95,31 @@ odoo-install -D sale             # install with demo data
 The `-D` flag is version-aware: it passes `--with-demo` for Odoo 19.0
 and above, and `--without-demo=False` for earlier versions.
 
+After a fresh install, it automatically saves an `init` savepoint and
+disables crons, and extends the database expiry date to avoid nag screens.
+
 ### Save & Restore
 
-Here are the two main scripts of this repo:
+**`savepoint`:**
+The core save/restore engine. `savedb` and `restoredb` are thin wrappers
+around it.
+
+```
+savepoint [name]       # save current DB as <db>__<name> (default: SAVEPOINT)
+savepoint -r [name]    # restore <db>__<name> into current DB
+```
 
 **`savedb`:**
-It stores the state of the current DB and its filestore. To do so, the
-script simply copies the current DB into a new one
-called `<current_db>__<savepoint name>`, where `<savepoint name>` is the
-optional argument of the script. If not provided, the savepoint name is
-defaulted to *SAVEPOINT*
+Stores the state of the current DB and its filestore by copying it into a
+new DB called `<current_db>__<savepoint name>`. The savepoint name defaults
+to *SAVEPOINT* if not provided.
 
 **`restoredb`:**
-It restores the current DB to a given state. The script takes one
-argument: the savepoint name. If not provided, it will use the state
-named *SAVEPOINT*.
+Restores the current DB from a savepoint. Takes one argument: the savepoint
+name. Defaults to *SAVEPOINT*.
+
+Both scripts determine the current DB via `getdb` and pass the resolved
+version to avoid ambiguity.
 
 ### Flow example
 
@@ -132,7 +150,7 @@ savedb
 ```
 
 I then post the invoice, try few things, change the code etc., and now I
-would like to try again. I can simply restore my DB juste before the
+would like to try again. I can simply restore my DB just before the
 invoice posting:
 
 ```
@@ -141,7 +159,7 @@ restoredb
 ```
 
 Suppose now I would even like to change the configuration, but it's a
-bit complicated because the posted AML, some constraints, etc. I can
+bit complicated because of the posted AML, some constraints, etc. I can
 simply restore the first state I saved:
 
 ```
@@ -155,12 +173,12 @@ These scripts manage the set of installed Odoo versions. They all accept
 an explicit list of versions as arguments; if none is given, they derive
 the list from the directories present in `~/odoo-env`.
 
-**`new-odoo-version`:**
+**`new-odoo-version` (external):**
 Sets up everything needed for a new Odoo version: git worktrees under
 `~/src/<version>/`, a fresh virtualenv under `~/odoo-env/<version>/`,
 and a `.odoorc` pre-filled with `db_name = <version>`. If the custom
 `config-run` script is available, it is called to configure the IDE
-project.
+project. This script is **not** part of this repository.
 
 ```
 new-odoo-version 19.0
@@ -180,21 +198,82 @@ update-version 17.0 18.0   # update specific versions only
 
 **`template-db`:**
 Creates (or recreates) a template database for each version by running
-`b <version> -I account_accountant`. These templates are used by `b`
-to initialise new DBs quickly without a full Odoo startup.
+`b <version> -I <modules>`. These templates are used by `b` to
+initialise new DBs quickly without a full Odoo startup.
 
 ```
 template-db                  # rebuild templates for all versions
 template-db 17.0 18.0        # rebuild for specific versions only
 ```
 
+### Git utilities
+
+**`rebase`:**
+Rebases the current branch of a local `odoo` or `enterprise` repository
+against its remote counterpart. Must be run from inside such a repository.
+
+```
+rebase           # rebase against origin/<version>
+rebase -f        # fetch all remotes first, then rebase
+```
+
+### Dependency analysis
+
+The `odoo-dependencies/` folder contains two Python scripts for exploring
+module dependency graphs. Both auto-detect the current Odoo version from
+the environment (via `OVERSION` or `~/.odoo_current_version`), or accept
+an explicit `-o VERSION` flag.
+
+**`search_dependencies.py`:**
+Recursively lists all dependencies of a given module.
+
+```
+python3 odoo-dependencies/search_dependencies.py sale
+python3 odoo-dependencies/search_dependencies.py sale -o 17.0
+```
+
+**`reverse_dependencies.py`:**
+Recursively lists all modules that depend on a given module.
+
+```
+python3 odoo-dependencies/reverse_dependencies.py account
+python3 odoo-dependencies/reverse_dependencies.py account -o 17.0
+```
+
+Both scripts scan the `odoo/addons`, `odoo/odoo/addons`, `enterprise`, and
+`custom` directories under `~/src/<version>/`.
+
+### Task cleanup
+
+**`clean-task`:**
+Removes everything associated with a task or ticket: local git branches in
+both `odoo` and `enterprise` repositories, all matching databases, and their
+filestores.
+
+```
+clean-task 1234567        # clean up by OPW number
+clean-task some-branch    # clean up by branch name
+```
+
+### Version resolution
+
+Most scripts source `_set_ovariables` to determine the active Odoo version
+(`OVERSION`) and the path to the relevant `.odoorc` (`ORC_PATH`). The
+resolution order is:
+
+1. `-o <version>` option passed to the script
+2. `GLOBAL_OVERSION` environment variable
+3. Version extracted from the first argument (e.g. `17.0-123456`)
+4. Output of the external `sv` script (name configurable via `SV_SCRIPT_NAME`)
+5. `~/.odoo_current_version` — persisted from the last successful resolution
+6. Fallback: `master`, or `FALLBACK_OVERSION` if set
+
 ### Misc
 
-This repository provides a few other scripts. Some are used internally
-by the above, others are standalone tools.
+This repository provides a few other scripts used internally by the above.
 
 - `copydb` takes two arguments _X_ and _Y_, copies _X_ into a new DB
-  called _Y_. Used internally by `savedb` and `restoredb`
+  called _Y_. Used internally by `savepoint` (and therefore `savedb`/`restoredb`)
 - `killodoo` kills all running Odoo processes. Called by `copydb` since
   a live server prevents DB copies
 - `ldb` lists all databases (`-a` also lists savepoints)
