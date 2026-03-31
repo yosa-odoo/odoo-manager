@@ -61,7 +61,9 @@ _odoo_highest=$(ls "$HOME/odoo-env" | grep -E '^[0-9]{2}\.[0-9]$' | sort -V | ta
 alias odoo-help="$HOME/src/$_odoo_highest/odoo/odoo-bin --help"
 unset _odoo_highest
 
-# --- GitHub ---
+# --- Git[Hub] ---
+
+alias update="update-version"
 
 alias gho="gh pr list --state all --base \$(getv) --limit 20"
 
