@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+
+source _set_ovariables
 
 if [ $# -lt 1 ]; then
     >&2 echo "Needs 1 parameter: task ID or branch name"
@@ -10,9 +12,9 @@ fi
 identifier=$(echo $1 | grep -oE "[0-9]{7}" || echo $1)
 
 echo "--- Delete branches"
-cd $HOME/src/all/odoo
+cd $HOME/src/"$OVERSION"/odoo
 git branch --format='%(refname:short)' | grep $identifier | while read b; do git branch -D $b; done
-cd $HOME/src/all/enterprise
+cd $HOME/src/"$OVERSION"/enterprise
 git branch --format='%(refname:short)' | grep $identifier | while read b; do git branch -D $b; done
 
 echo
