@@ -67,6 +67,7 @@ community=false
 keep_window=false
 window_id=$(xdotool getwindowfocus)
 window_name=$(xdotool getwindowfocus getwindowname)
+with_demo=false
 
 
 while [[ "$#" -gt 0 ]]; do
@@ -124,6 +125,7 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
+explicit_name=$name
 name=${name:-$(getdb)}
 
 if [[ -z "$name" ]]; then
@@ -151,6 +153,7 @@ switch_branch() {
   fetch="$3"
   must_reset="$4"
   version="$5"
+
   cd "$ODOO_SRC_PATH"/"$version"/"$repo" || (>&2 echo "Repo $repo not found"; exit 1)
 
   branch=$(git branch | grep -E "$branch_name\$" >/dev/null && echo "$branch_name")
@@ -179,8 +182,7 @@ switch_branch() {
 echo
 echo "Opening $ODOO_SRC_PATH"/"$odoo" && openpycharm "$ODOO_SRC_PATH"/"$odoo" &
 
-echo "Switching Odoo version..."
-cv "$odoo" > /dev/null
+
 
 if echo "$name" | grep -oEq '^master|(saas-)?[0-9]{2}\.[0-9]-.'
 then
@@ -221,7 +223,7 @@ setdb "$database"
 
 
 if [ -n "$modules_to_init" ]; then
-  odoo-install "$modules_to_init"
+  odoo-install $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_init"
 elif [ "$odoo" != "master" ] && [ "$init" = true ] && ! ldb | grep -Eq "^$database$"
 then
   template="${odoo}__init"
@@ -242,7 +244,7 @@ then
 fi
 
 if [ -n "$modules_to_install" ]; then
-  odoo-install -n "$modules_to_install"
+  odoo-install -n $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_install"
 fi
 
 

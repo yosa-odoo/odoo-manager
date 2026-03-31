@@ -4,7 +4,7 @@
 # Sourced from ~/.zshrc via the odoo-manager block at the bottom
 
 # --- Environment ---
-# torefactor (not the coffee mdr)
+
 ce() {
     changexenv "$1"
     source "$HOME/odoo-env/Xenv/bin/activate"
@@ -61,9 +61,7 @@ _odoo_highest=$(ls "$HOME/odoo-env" | grep -E '^[0-9]{2}\.[0-9]$' | sort -V | ta
 alias odoo-help="$HOME/src/$_odoo_highest/odoo/odoo-bin --help"
 unset _odoo_highest
 
-# --- Git[Hub] ---
-
-alias update="update-version"
+# --- GitHub ---
 
 alias gho="gh pr list --state all --base \$(getv) --limit 20"
 

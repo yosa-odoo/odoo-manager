@@ -47,4 +47,4 @@ update_repo "enterprise" &
 
 wait
 
-notify-send "oupdate" "Done"
+command -v notify-send >/dev/null 2>&1 && notify-send "oupdate" "Done"

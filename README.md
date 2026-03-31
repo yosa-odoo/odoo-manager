@@ -32,7 +32,16 @@ Run the installer and follow the prompts:
 python3 install.py
 ```
 
-It will ask for the setup mode, the source and virtualenv paths, and the
+The installer first asks whether Odoo/enterprise are already cloned:
+
+- **Fresh setup (no):** clones `odoo` and `enterprise` into `<src>/master/`,
+  adds the `odoo-dev` remote to each, disables accidental pushes to `origin`,
+  creates the `master` virtualenv, then optionally sets up additional versions
+  (e.g. `17.0 18.0`) by calling `new-odoo-version`.
+- **Existing setup (yes):** verifies that the source and virtualenv directories
+  exist, offering to create any that are missing.
+
+It then asks for the setup mode, the source and virtualenv paths, and the
 shell config file to update. Two modes are available:
 
 - `single`: one `~/.odoorc` shared across all versions
@@ -48,10 +57,11 @@ To define and get the database you are working on, `setdb` and `getdb`
 must be used.
 
 - `setdb` takes one argument and writes the DB name into the `.odoorc`
-  file for the current version
+  file for the current version (defaults to `odoo` if no argument given)
 - `getdb` reads and returns the DB name from the same file
+- `getv` prints the resolved Odoo version (useful for scripting)
 
-Both scripts rely on `_set_ovariables` (see [Version resolution](#version-resolution))
+All three rely on `_set_ovariables` (see [Version resolution](#version-resolution))
 to locate the correct `.odoorc`.
 
 ### Switch
@@ -173,12 +183,12 @@ These scripts manage the set of installed Odoo versions. They all accept
 an explicit list of versions as arguments; if none is given, they derive
 the list from the directories present in `~/odoo-env`.
 
-**`new-odoo-version` (external):**
+**`new-odoo-version`:**
 Sets up everything needed for a new Odoo version: git worktrees under
-`~/src/<version>/`, a fresh virtualenv under `~/odoo-env/<version>/`,
+`<src>/<version>/`, a fresh virtualenv under `<env>/<version>/`,
 and a `.odoorc` pre-filled with `db_name = <version>`. If the custom
 `config-run` script is available, it is called to configure the IDE
-project. This script is **not** part of this repository.
+project.
 
 ```
 new-odoo-version 19.0
@@ -189,10 +199,11 @@ new-odoo-version saas-19.1 19.0   # set up several versions at once
 Pulls the latest changes for all versions in both the `odoo` and
 `enterprise` repositories. Each version branch is rebased against its
 remote counterpart; the currently checked-out branch is restored
-afterwards.
+afterwards. Sends a desktop notification via `notify-send` on completion
+if available.
 
 ```
-update-version              # update all versions found in ~/odoo-env
+update-version              # update all versions found in <env>/
 update-version 17.0 18.0   # update specific versions only
 ```
 
@@ -202,8 +213,8 @@ Creates (or recreates) a template database for each version by running
 initialise new DBs quickly without a full Odoo startup.
 
 ```
-template-db                  # rebuild templates for all versions
-template-db 17.0 18.0        # rebuild for specific versions only
+template-db              # rebuild templates for all versions
+template-db 17.0 18.0   # rebuild for specific versions only
 ```
 
 ### Git utilities
