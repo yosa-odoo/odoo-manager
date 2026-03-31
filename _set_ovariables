@@ -27,9 +27,14 @@
 #    specified
 #
 # Finally, the script defines `ORC_PATH`:
-# - First tries `$HOME/src/$OVERSION/.odoorc` (multi-version setup)
+# - First tries `$ODOO_SRC_PATH/$OVERSION/.odoorc` (multi-version setup)
 # - Falls back to `$HOME/.odoorc` (single shared rc file)
 # - If neither exists, the variable remains unset.
+#
+# The script also sets two path variables with fallbacks:
+# - `ODOO_SRC_PATH`: base directory for Odoo source trees (default: `~/src`)
+# - `ODOO_ENV_PATH`: base directory for Python virtualenvs (default: `~/odoo-env`)
+# Both can be overridden via environment or `~/.odoo-manager.conf`.
 
 version_rg="(master|(saas-)?[0-9]{2}\.[0-9])"
 
@@ -86,10 +91,11 @@ if [ -z "$OVERSION" ]; then
   OVERSION="${FALLBACK_OVERSION:-master}"
 fi
 
-if [ -e "$HOME/src/$OVERSION/.odoorc" ]; then
-  ORC_PATH="$HOME/src/$OVERSION/.odoorc"
+ODOO_SRC_PATH="${ODOO_SRC_PATH:-$HOME/src}"
+ODOO_ENV_PATH="${ODOO_ENV_PATH:-$HOME/odoo-env}"
+
+if [ -e "$ODOO_SRC_PATH/$OVERSION/.odoorc" ]; then
+  ORC_PATH="$ODOO_SRC_PATH/$OVERSION/.odoorc"
 elif [ -e "$HOME/.odoorc" ]; then
   ORC_PATH="$HOME/.odoorc"
 fi
-
-ODOO_ENV_PATH="${ODOO_ENV_PATH:-$HOME/odoo-env}"

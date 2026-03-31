@@ -111,13 +111,14 @@ def ensure_executable():
 
 
 
-def write_conf(env_path):
+def write_conf(src_path, env_path):
     conf_path = HOME / ".odoo-manager.conf"
     if DRY_RUN:
         print(f"  Would write {conf_path}")
         return
     conf_path.write_text(
         f"# odoo-manager configuration — sourced by install.py\n"
+        f"export ODOO_SRC_PATH={src_path}\n"
         f"export ODOO_ENV_PATH={env_path}\n"
     )
     print(f"  Written {conf_path}")
@@ -147,7 +148,7 @@ def main():
     print()
 
     ensure_executable()
-    write_conf(env_path)
+    write_conf(src_path, env_path)
 
     if setup_mode == "single":
         write_odoorc(HOME / ".odoorc")

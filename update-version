@@ -3,7 +3,9 @@
 set -e
 # set -x
 
-available=$(ls -1 "${ODOO_ENV_PATH:-$HOME/odoo-env}" | grep -E '^(master|(saas-)?[0-9]{2}\.[0-9])$')
+ODOO_SRC_PATH="${ODOO_SRC_PATH:-$HOME/src}"
+ODOO_ENV_PATH="${ODOO_ENV_PATH:-$HOME/odoo-env}"
+available=$(ls -1 "$ODOO_ENV_PATH" | grep -E '^(master|(saas-)?[0-9]{2}\.[0-9])$')
 versions=${*:-$available}
 
 function update_repo {
@@ -13,7 +15,7 @@ function update_repo {
     echo "[$repo] $1"
   }
 
-  cd "$HOME"/src/master/"$repo"
+  cd "$ODOO_SRC_PATH"/master/"$repo"
 
   log "Fetching $versions..."
   git fetch -q origin $versions
@@ -32,7 +34,7 @@ function update_version {
   repo=$1
   version=$2
 
-  cd "$HOME"/src/"$version"/"$repo"
+  cd "$ODOO_SRC_PATH"/"$version"/"$repo"
 
   current_branch=$(git branch --show-current)
   git checkout -q "$version"
