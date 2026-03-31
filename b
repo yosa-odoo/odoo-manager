@@ -1,6 +1,8 @@
 #!/bin/bash
 # set -x
 
+source _set_ovariables
+
 function show_help {
   echo "Usage: b [OPTIONS] NAME"
   echo ""
@@ -61,7 +63,10 @@ init=true
 restore_init=false
 modules_to_init=""
 modules_to_install=""
-with_demo=false
+community=false
+keep_window=false
+window_id=$(xdotool getwindowfocus)
+window_name=$(xdotool getwindowfocus getwindowname)
 
 
 while [[ "$#" -gt 0 ]]; do
@@ -100,6 +105,9 @@ while [[ "$#" -gt 0 ]]; do
       ;;
     -D|--with-demo)
       with_demo=true
+      ;;
+    -k|--keep-window)
+      keep_window=true
       ;;
     *)
       if [ -z "$name" ]
@@ -143,7 +151,7 @@ switch_branch() {
   fetch="$3"
   must_reset="$4"
   version="$5"
-  cd "$HOME"/src/"$version"/"$repo" || (>&2 echo "Repo $repo not found"; exit 1)
+  cd "$ODOO_SRC_PATH"/"$version"/"$repo" || (>&2 echo "Repo $repo not found"; exit 1)
 
   branch=$(git branch | grep -E "$branch_name\$" >/dev/null && echo "$branch_name")
   if [ "$fetch" = true ] && [ -z "$branch" ]
@@ -169,6 +177,8 @@ switch_branch() {
 
 
 echo
+echo "Opening $ODOO_SRC_PATH"/"$odoo" && openpycharm "$ODOO_SRC_PATH"/"$odoo" &
+
 echo "Switching Odoo version..."
 cv "$odoo" > /dev/null
 
@@ -211,7 +221,7 @@ setdb "$database"
 
 
 if [ -n "$modules_to_init" ]; then
-  odoo-install $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_init"
+  odoo-install "$modules_to_init"
 elif [ "$odoo" != "master" ] && [ "$init" = true ] && ! ldb | grep -Eq "^$database$"
 then
   template="${odoo}__init"
@@ -232,6 +242,17 @@ then
 fi
 
 if [ -n "$modules_to_install" ]; then
-  odoo-install -n $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_install"
+  odoo-install -n "$modules_to_install"
+fi
+
+
+# config_search "$odoo"
+
+if echo "$window_name" | grep -q "$odoo"; then
+  keep_window=true
+fi
+
+if [ "$keep_window" = false ] ; then
+  (sleep 0.5s && wmctrl -ic "$window_id") &
 fi
 
