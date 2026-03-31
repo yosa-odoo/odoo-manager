@@ -1,6 +1,8 @@
 #!/bin/bash
 # set -x
 
+source _set_ovariables
+
 function show_help {
   echo "Usage: b [OPTIONS] NAME"
   echo ""
@@ -144,7 +146,7 @@ switch_branch() {
   fetch="$3"
   must_reset="$4"
   version="$5"
-  cd "$HOME"/src/"$version"/"$repo" || (>&2 echo "Repo $repo not found"; exit 1)
+  cd "$ODOO_SRC_PATH/"$version"/"$repo" || (>&2 echo "Repo $repo not found"; exit 1)
 
   branch=$(git branch | grep -E "$branch_name\$" >/dev/null && echo "$branch_name")
   if [ "$fetch" = true ] && [ -z "$branch" ]
