@@ -1,69 +1,53 @@
-# WARNING NOT CLEANED UP YET 
-
 # Odoo workflow — aliases and functions
-# Sourced from ~/.zshrc via the odoo-manager block at the bottom
+# Optional. Source manually from ~/.zshrc:
+#   [ -f "<path-to-odoo-manager>/odoo.zsh" ] && source "<path-to-odoo-manager>/odoo.zsh"
 
 # --- Environment ---
 
 ce() {
     changexenv "$1"
-    source "$HOME/odoo-env/Xenv/bin/activate"
+    source "${ODOO_ENV_PATH}/Xenv/bin/activate"
 }
 
 oenv_activate() {
-    source ~/odoo-env/Xenv/bin/activate
+    source "${ODOO_ENV_PATH}/Xenv/bin/activate"
 }
 
 # --- Navigation ---
 
 alias od="cd ..; cd odoo"
 alias en="cd ..; cd enterprise"
-alias o="cd ~/src/\$(getv)/odoo"
-alias e="cd ~/src/\$(getv)/enterprise"
+alias o='cd "${ODOO_SRC_PATH}/$(getv)/odoo"'
+alias e='cd "${ODOO_SRC_PATH}/$(getv)/enterprise"'
+
 oshell() {
     local version=$(getv)
     local odoorc
-    if [ -f "$HOME/src/$version/.odoorc" ]; then
-        odoorc="$HOME/src/$version/.odoorc"
+    if [ -f "${ODOO_SRC_PATH}/$version/.odoorc" ]; then
+        odoorc="${ODOO_SRC_PATH}/$version/.odoorc"
     else
         odoorc="$HOME/.odoorc"
     fi
-    o && oenv_activate && cd .. && ./odoo/odoo-bin shell -c "$odoorc" -d $(getdb)
+    cd "${ODOO_SRC_PATH}/$version" && oenv_activate && ./odoo/odoo-bin shell -c "$odoorc" -d $(getdb)
 }
 
 # --- Database ---
 
 alias getopw="getdb | cut -d '-' -f1"
 alias getticket="getdb | cut -c1-7"
-alias psqlo="psql -d \$(getdb)"
-alias apps="psql -d \$(getdb) -c \"SELECT name, state FROM ir_module_module WHERE state = 'installed';\""
+alias psqlo='psql -d $(getdb)'
+alias apps='psql -d $(getdb) -c "SELECT name, state FROM ir_module_module WHERE state = '\''installed'\'';"'
 
-# --- Tools ---
+# --- Help ---
 
-alias bb="b \$(sb)"
-alias com="copy_odoo_module"
-alias sdv="setdbversion"
-alias mailhog="~/go/bin/MailHog"
-alias applytemp="ls ~/temp/ | fzf -e | git apply"
-alias search_depends="python3 ~/odoo_tools/odoo-manager/odoo-dependencies/search_dependencies.py"
-alias reverse_depends="python3 ~/odoo_tools/odoo-manager/odoo-dependencies/reverse_dependencies.py"
-alias dd="python3 ~/odoo_tools/difference_days.py"
-alias whosoff="~/odoo-env/16.0/bin/python3 ~/odoo_tools/who_is_off.py"
-alias tickets="~/odoo_tools/env_odoo_tools/bin/python3 ~/odoo_tools/pta/tickets.py | xclip -selection clipboard"
-alias dtickets="~/odoo_tools/env_odoo_tools/bin/python3 ~/odoo_tools/tickets.py --dispatch | xclip -selection clipboard"
-alias oe-support="/home/odoo/Documents/config/odoo/oe-support.sh"
-alias done_ticket="/home/odoo/Documents/config/odoo/done_ticket.sh"
-alias oc="odoorc-oc"
-alias oe="odoorc-oe"
-
-# odoo-help: use the highest installed version (excluding master)
-_odoo_highest=$(ls "$HOME/odoo-env" | grep -E '^[0-9]{2}\.[0-9]$' | sort -V | tail -1)
-alias odoo-help="$HOME/src/$_odoo_highest/odoo/odoo-bin --help"
-unset _odoo_highest
+odoo-help() {
+    local highest=$(ls "$ODOO_ENV_PATH" | grep -E '^[0-9]{2}\.[0-9]$' | sort -V | tail -1)
+    "$ODOO_SRC_PATH/$highest/odoo/odoo-bin" --help "$@"
+}
 
 # --- GitHub ---
 
-alias gho="gh pr list --state all --base \$(getv) --limit 20"
+alias gho='gh pr list --state all --base $(getv) --limit 20'
 
 ghpr() {
     local TEMPLATE='{{- tablerow ("REPO" | color "blue+b") ("PR" | color "blue+b") ("CREATED" | color "blue+b") ("AUTHOR" | color "blue+b") ("TITLE" | color "blue+b") -}}

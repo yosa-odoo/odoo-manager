@@ -46,6 +46,33 @@ The installer appends the scripts directory to `PATH` and sources the
 bash completion file. Run with `--dry-run` to preview what would be
 written without touching any file.
 
+### Shell aliases (optional)
+
+`odoo.zsh` provides aliases and functions for the Odoo workflow. Not
+sourced automatically. To enable, add to your `~/.zshrc`:
+
+```bash
+[ -f "<path-to-odoo-manager>/odoo.zsh" ] && source "<path-to-odoo-manager>/odoo.zsh"
+```
+
+`ODOO_SRC_PATH` and `ODOO_ENV_PATH` must be set (the installer does this).
+Available aliases:
+
+| Alias / function | Description |
+|---|---|
+| `o` / `e` | `cd` into the current version's `odoo` / `enterprise` directory |
+| `od` / `en` | `cd` to `odoo` / `enterprise` relative to current directory |
+| `oshell` | Open an Odoo shell for the current version and DB |
+| `getopw` | Extract the OPW number from the current DB name |
+| `getticket` | Extract the 7-digit ticket number from the current DB name |
+| `psqlo` | Open `psql` on the current DB |
+| `apps` | List installed modules in the current DB |
+| `odoo-help` | Run `odoo-bin --help` using the highest installed version |
+| `gho` | List open PRs on the current version branch |
+| `ghpr` | Interactive PR browser (requires `gh` and `fzf`) |
+| `p` / `pykill` | Open PyCharm / kill all Java processes |
+| `ce` / `oenv_activate` | Switch the active virtualenv (requires `changexenv`) |
+
 ### Setup
 
 To define and get the database you are working on, `setdb` and `getdb`
@@ -271,17 +298,17 @@ resolution order is:
 2. `GLOBAL_OVERSION` environment variable
 3. Version extracted from the first argument (e.g. `17.0-123456`)
 4. Output of the external `sv` script (name configurable via `SV_SCRIPT_NAME`)
-5. `~/.odoo_current_version` — persisted from the last successful resolution
+5. `~/.odoo_current_version`, persisted from the last successful resolution
 6. Fallback: `master`, or `FALLBACK_OVERSION` if set
 
 `_set_ovariables` also sets two path variables used by all scripts:
 
-- `ODOO_SRC_PATH` — base directory for Odoo source trees (default: `~/src`)
-- `ODOO_ENV_PATH` — base directory for Python virtualenvs (default: `~/odoo-env`)
+- `ODOO_SRC_PATH`: base directory for Odoo source trees (default: `~/src`)
+- `ODOO_ENV_PATH`: base directory for Python virtualenvs (default: `~/odoo-env`)
 
-Both are written to `~/.odoo-manager.conf` by `install.py` and sourced by the
-shell rc at startup. The fallbacks in `_set_ovariables` only apply when the
-conf file is absent (e.g. before running the installer).
+Both are written to `~/.odoo-manager.conf` by `install.py` and sourced at
+shell startup. The fallbacks only apply when the conf file is absent (e.g.
+before running the installer).
 
 ### Misc
 
