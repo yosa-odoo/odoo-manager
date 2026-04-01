@@ -83,15 +83,15 @@ must be used.
 - `getdb` reads and returns the DB name from the same file
 - `getv` prints the resolved Odoo version (useful for scripting)
 
-All three rely on `_set_ovariables` (see [Version resolution](#version-resolution))
-to locate the correct `.odoorc`.
+`setdb` and `getdb` rely on `_set_ovariables` (see [Version resolution](#version-resolution))
+to locate the correct `.odoorc`. `getv` uses it only for version resolution.
 
 ### Switch
 
-**`b` (external):**
-Sets up the full Odoo environment for a given ticket or branch name. It
-activates the right virtualenv, sets the DB name, and initializes the
-DB if needed. This script is **not** part of this repository.
+**`b`:**
+Sets up the Odoo environment for a given ticket or branch name. It
+checks out the right branch, sets the DB name, and initializes the
+DB if needed.
 
 The basic usage is with a ticket number:
 

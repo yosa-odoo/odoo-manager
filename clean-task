@@ -20,7 +20,7 @@ git branch --format='%(refname:short)' | grep $identifier | while read b; do git
 echo
 
 echo "--- Delete DBs"
-dropall "$identifier".*
+dropall "$identifier"
 
 echo
 
