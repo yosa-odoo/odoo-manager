@@ -1,0 +1,16 @@
+#!/bin/bash
+# Sourced by b if present. Defines hook functions called at key points.
+
+b_hook_pre() {
+  _window_id=$(xdotool getwindowfocus)
+  _window_name=$(xdotool getwindowfocus getwindowname)
+  echo
+  echo "Opening $ODOO_SRC_PATH/$odoo..." && openpycharm "$ODOO_SRC_PATH/$odoo" &
+}
+
+b_hook_post() {
+  if echo "$_window_name" | grep -q "$odoo"; then
+    return
+  fi
+  (sleep 0.5s && wmctrl -ic "$_window_id") &
+}
