@@ -3,6 +3,8 @@
 
 source _set_ovariables
 
+# hook to be able to use IDE custom config such as for the Pycharm Branch
+# loads the hook
 _B_DIR=$(dirname "$(readlink -f "$0")")
 b_hook_pre()  { :; }
 b_hook_post() { :; }
@@ -143,6 +145,7 @@ then
   exit 1
 fi
 
+# call the hook
 b_hook_pre
 
 switch_branch() {
@@ -247,4 +250,5 @@ if [ -n "$modules_to_install" ]; then
   odoo-install -n $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_install"
 fi
 
+# last hook
 b_hook_post
