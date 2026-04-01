@@ -3,6 +3,13 @@
 
 source _set_ovariables
 
+# hook to be able to use IDE custom config such as for the Pycharm Branch
+# loads the hook
+_B_DIR=$(dirname "$(readlink -f "$0")")
+b_hook_pre()  { :; }
+b_hook_post() { :; }
+[ -f "$_B_DIR/b.hooks" ] && source "$_B_DIR/b.hooks"
+
 function show_help {
   echo "Usage: b [OPTIONS] NAME"
   echo ""
@@ -138,7 +145,8 @@ then
   exit 1
 fi
 
-
+# call the hook
+b_hook_pre
 
 switch_branch() {
   repo="$1"
@@ -228,7 +236,7 @@ then
     echo "Initializing DB & Filestore..."
     createdb -T "$template" "$database"
     mkdir -p ~/.local/share/Odoo/filestore/"$database"
-    cp -rf ~/.local/share/Odoo/filestore/"$odoo"/* ~/.local/share/Odoo/filestore/"$database"/
+    cp -rf ~/.local/share/Odoo/filestore/"$template"/* ~/.local/share/Odoo/filestore/"$database"/
     savedb init
   fi
 elif [ "$restore_init" = true ] && ldb -a | grep -Eq "^${database}__init$"
@@ -242,3 +250,5 @@ if [ -n "$modules_to_install" ]; then
   odoo-install -n $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_install"
 fi
 
+# last hook
+b_hook_post
