@@ -3,6 +3,11 @@
 
 source _set_ovariables
 
+_B_DIR=$(dirname "$(readlink -f "$0")")
+b_hook_pre()  { :; }
+b_hook_post() { :; }
+[ -f "$_B_DIR/b.hooks" ] && source "$_B_DIR/b.hooks"
+
 function show_help {
   echo "Usage: b [OPTIONS] NAME"
   echo ""
@@ -63,10 +68,6 @@ init=true
 restore_init=false
 modules_to_init=""
 modules_to_install=""
-community=false
-keep_window=false
-window_id=$(xdotool getwindowfocus)
-window_name=$(xdotool getwindowfocus getwindowname)
 with_demo=false
 
 
@@ -107,9 +108,6 @@ while [[ "$#" -gt 0 ]]; do
     -D|--with-demo)
       with_demo=true
       ;;
-    -k|--keep-window)
-      keep_window=true
-      ;;
     *)
       if [ -z "$name" ]
       then
@@ -145,7 +143,7 @@ then
   exit 1
 fi
 
-
+b_hook_pre
 
 switch_branch() {
   repo="$1"
@@ -153,7 +151,6 @@ switch_branch() {
   fetch="$3"
   must_reset="$4"
   version="$5"
-
   cd "$ODOO_SRC_PATH"/"$version"/"$repo" || (>&2 echo "Repo $repo not found"; exit 1)
 
   branch=$(git branch | grep -E "$branch_name\$" >/dev/null && echo "$branch_name")
@@ -176,13 +173,16 @@ switch_branch() {
   return 1
 }
 
-echo
-echo "Opening $ODOO_SRC_PATH"/"$odoo" && openpycharm "$ODOO_SRC_PATH"/"$odoo" &
 
-echo "Resetting to $odoo..."
-git -C "$ODOO_SRC_PATH/$odoo/odoo" checkout -q "$odoo" &
-git -C "$ODOO_SRC_PATH/$odoo/enterprise" checkout -q "$odoo" &
-wait
+
+
+if [ -n "$explicit_name" ] || [ -z "$modules_to_install" ]; then
+  echo
+  echo "Resetting to $odoo..."
+  git -C "$ODOO_SRC_PATH/$odoo/odoo" checkout -q "$odoo" &
+  git -C "$ODOO_SRC_PATH/$odoo/enterprise" checkout -q "$odoo" &
+  wait
+fi
 
 if echo "$name" | grep -oEq '^master|(saas-)?[0-9]{2}\.[0-9]-.'
 then
@@ -233,7 +233,7 @@ then
     echo "Initializing DB & Filestore..."
     createdb -T "$template" "$database"
     mkdir -p ~/.local/share/Odoo/filestore/"$database"
-    cp -rf ~/.local/share/Odoo/filestore/"$odoo"/* ~/.local/share/Odoo/filestore/"$database"/
+    cp -rf ~/.local/share/Odoo/filestore/"$template"/* ~/.local/share/Odoo/filestore/"$database"/
     savedb init
   fi
 elif [ "$restore_init" = true ] && ldb -a | grep -Eq "^${database}__init$"
@@ -247,14 +247,4 @@ if [ -n "$modules_to_install" ]; then
   odoo-install -n $( [ "$with_demo" = true ] && echo "-D" ) "$modules_to_install"
 fi
 
-
-# config_search "$odoo"
-
-if echo "$window_name" | grep -q "$odoo"; then
-  keep_window=true
-fi
-
-if [ "$keep_window" = false ] ; then
-  (sleep 0.5s && wmctrl -ic "$window_id") &
-fi
-
+b_hook_post

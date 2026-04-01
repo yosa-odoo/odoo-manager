@@ -89,6 +89,7 @@ fi
 if [ -z "$OVERSION" ]; then
   echo "No version found, defaulting to ${FALLBACK_OVERSION:-master}" >&2
   OVERSION="${FALLBACK_OVERSION:-master}"
+  echo "$OVERSION" > "$_oversion_file"
 fi
 
 ODOO_SRC_PATH="${ODOO_SRC_PATH:-$HOME/src}"
