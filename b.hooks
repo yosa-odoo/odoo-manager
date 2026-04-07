@@ -9,7 +9,12 @@ b_hook_pre() {
 }
 
 b_hook_post() {
+  echo "$_window_name"
+  echo "$odoo"
   if echo "$_window_name" | grep -q "$odoo"; then
+    return
+  fi
+  if ! echo "$_window_name" | grep -qi "pycharm"; then
     return
   fi
   (sleep 0.5s && wmctrl -ic "$_window_id") &
