@@ -5,12 +5,7 @@
 # --- Environment ---
 
 ce() {
-    changexenv "$1"
-    source "${ODOO_ENV_PATH}/Xenv/bin/activate"
-}
-
-oenv_activate() {
-    source "${ODOO_ENV_PATH}/Xenv/bin/activate"
+    source _set_ovariables && source "${ODOO_ENV_PATH}/$OVERSION/bin/activate"
 }
 
 # --- Navigation ---
