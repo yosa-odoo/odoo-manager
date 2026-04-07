@@ -17,8 +17,8 @@ oenv_activate() {
 
 alias od="cd ..; cd odoo"
 alias en="cd ..; cd enterprise"
-alias o='cd "${ODOO_SRC_PATH}/$(getv)/odoo"'
-alias e='cd "${ODOO_SRC_PATH}/$(getv)/enterprise"'
+alias o='source ~/odoo_tools/odoo-manager/_set_ovariables && cd "${ODOO_SRC_PATH}/$(getv)/odoo"'
+alias e='source ~/odoo_tools/odoo-manager/_set_ovariables && cd "${ODOO_SRC_PATH}/$(getv)/enterprise"'
 
 oshell() {
     local version=$(getv)
